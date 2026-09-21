@@ -1,66 +1,116 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iris Classification & Species Wiki</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --title-color: #38bdf8;
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --preset-bg: rgba(255, 255, 255, 0.08);
+            --preset-text: #e2e8f0;
+            --wiki-bg: rgba(0, 0, 0, 0.25);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-mode {
+            --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --border-color: rgba(255, 255, 255, 0.8);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --title-color: #4f46e5;
+            --input-bg: rgba(255, 255, 255, 0.85);
+            --input-border: rgba(79, 70, 229, 0.2);
+            --preset-bg: rgba(79, 70, 229, 0.1);
+            --preset-text: #3730a3;
+            --wiki-bg: rgba(255, 255, 255, 0.5);
+            --shadow-color: rgba(79, 70, 229, 0.15);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; transition: background 0.3s, color 0.3s, border-color 0.3s; }
+        
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            background: var(--bg-gradient);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            color: #f8fafc;
+            color: var(--text-primary);
         }
+
         .app-container {
             display: flex;
             flex-direction: row;
             width: 100%;
             max-width: 1100px;
-            background: rgba(255, 255, 255, 0.05);
+            background: var(--card-bg);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-color);
             border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 50px -12px var(--shadow-color);
         }
+
         .left-panel, .right-panel { flex: 1; padding: 40px; }
-        .left-panel { border-right: 1px solid rgba(255, 255, 255, 0.1); }
+        .left-panel { border-right: 1px solid var(--border-color); }
         
-        h1 { font-size: 1.8rem; margin-bottom: 8px; color: #38bdf8; }
-        p.subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 24px; }
+        .header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        h1 { font-size: 1.8rem; color: var(--title-color); }
         
-        .presets-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; margin-bottom: 10px; }
+        .btn-theme {
+            background: var(--preset-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-theme:hover { opacity: 0.8; }
+
+        p.subtitle { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 24px; }
+        
+        .presets-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600; }
         .presets-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
         .btn-preset {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #e2e8f0;
+            background: var(--preset-bg);
+            border: 1px solid var(--border-color);
+            color: var(--preset-text);
             padding: 8px 12px;
             border-radius: 8px;
             font-size: 0.78rem;
             cursor: pointer;
             transition: all 0.2s;
         }
-        .btn-preset:hover { background: #38bdf8; color: #0f172a; font-weight: bold; }
+        .btn-preset:hover { background: var(--title-color); color: #fff; font-weight: bold; }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
-        .input-group label { display: block; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px; }
+        .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
         .input-group input {
             width: 100%;
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
             padding: 10px 12px;
             border-radius: 8px;
-            color: #fff;
+            color: var(--text-primary);
             font-size: 0.95rem;
             outline: none;
         }
-        .input-group input:focus { border-color: #38bdf8; }
+        .input-group input:focus { border-color: var(--title-color); }
         
         .btn-submit {
             width: 100%;
@@ -77,24 +127,25 @@
         .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
 
         .right-panel { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        .placeholder-state { color: #64748b; }
+        .placeholder-state { color: var(--text-secondary); }
         .result-card { width: 100%; display: none; animation: fadeIn 0.4s ease-in-out forwards; }
-        .flower-image { width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .species-name { font-size: 1.6rem; color: #4ade80; text-transform: capitalize; margin-bottom: 12px; }
+        .flower-image { width: 100%; height: 210px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; border: 1px solid var(--border-color); }
+        .species-name { font-size: 1.6rem; color: #10b981; text-transform: capitalize; margin-bottom: 12px; font-weight: 700; }
         .wiki-box {
-            background: rgba(0, 0, 0, 0.25);
+            background: var(--wiki-bg);
             border-radius: 12px;
             padding: 16px;
             text-align: left;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.88rem;
+            line-height: 1.6;
+            border: 1px solid var(--border-color);
         }
-        .wiki-item { margin-bottom: 8px; }
-        .wiki-item strong { color: #38bdf8; }
+        .wiki-item { margin-bottom: 8px; color: var(--text-primary); }
+        .wiki-item:last-child { margin-bottom: 0; }
+        .wiki-item strong { color: var(--title-color); }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @media (max-width: 768px) { .app-container { flex-direction: column; } .left-panel { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); } }
+        @media (max-width: 768px) { .app-container { flex-direction: column; } .left-panel { border-right: none; border-bottom: 1px solid var(--border-color); } }
     </style>
 </head>
 <body>
@@ -102,7 +153,10 @@
 <div class="app-container">
     <!-- Cột trái: Form nhập liệu & Preset -->
     <div class="left-panel">
-        <h1>Phân Loại Hoa Iris</h1>
+        <div class="header-row">
+            <h1>Phân Loại Hoa Iris</h1>
+            <button class="btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 Chế độ tối</button>
+        </div>
         <p class="subtitle">Mô hình Support Vector Machine (SVM) Classifier</p>
 
         <div class="presets-title">Điền nhanh tham số mẫu (Centroids):</div>
@@ -148,7 +202,6 @@
                 <div class="wiki-item"><strong>Tên khoa học:</strong> <span id="wikiSciName"></span></div>
                 <div class="wiki-item"><strong>Phân bố:</strong> <span id="wikiDist"></span></div>
                 <div class="wiki-item"><strong>Đặc điểm:</strong> <span id="wikiDesc"></span></div>
-                <div class="wiki-item"><strong>Insight ML:</strong> <span id="wikiFact"></span></div>
             </div>
         </div>
     </div>
@@ -160,24 +213,27 @@
             sciName: "Iris setosa",
             dist: "Vùng khí hậu lạnh Bắc Mỹ và Đông Á.",
             desc: "Cánh hoa ngắn, nhỏ, đài hoa xòe rộng. Thường có màu xanh tím đặc trưng.",
-            fact: "Tuyến tính hoàn hảo: Đây là loài duy nhất có thể phân tách 100% bằng ranh giới tuyến tính đơn giản.",
             img: "https://upload.wikimedia.org/wikipedia/commons/5/56/Kosaciec_szczecinkowaty_Iris_setosa.jpg"
         },
         "versicolor": {
             sciName: "Iris versicolor",
             dist: "Khu vực đầm lầy, ven hồ Bắc Mỹ.",
             desc: "Kích thước hoa trung bình, cánh hoa có vân sọc mượt mà.",
-            fact: "Ranh giới phức tạp: Nằm ở vùng trung gian trong không gian thuộc tính, dễ bị nhầm lẫn với Virginica.",
             img: "https://upload.wikimedia.org/wikipedia/commons/4/41/Iris_versicolor_3.jpg"
         },
         "virginica": {
             sciName: "Iris virginica",
             dist: "Đồng cỏ ẩm ướt vùng Đông Bắc Mỹ.",
             desc: "Hoa lớn nhất trong 3 loài, cánh hoa dài và có gân hoa vàng đậm nổi bật.",
-            fact: "Kích thước vượt trội: Yêu cầu mô hình SVM tính toán khoảng cách lề (margin) tối ưu để phân biệt.",
             img: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Iris_virginica.jpg"
         }
     };
+
+    function toggleTheme() {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        document.getElementById('themeBtn').innerText = isLight ? "☀️ Chế độ sáng" : "🌙 Chế độ tối";
+    }
 
     function applyPreset(sl, sw, pl, pw) {
         document.getElementById('sl').value = sl;
@@ -220,7 +276,6 @@
             document.getElementById('wikiSciName').innerText = info.sciName;
             document.getElementById('wikiDist').innerText = info.dist;
             document.getElementById('wikiDesc').innerText = info.desc;
-            document.getElementById('wikiFact').innerText = info.fact;
 
         } catch (err) {
             alert('Lỗi kết nối API!');
