@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -98,8 +98,20 @@
         }
         .btn-preset:hover { background: var(--title-color); color: #fff; font-weight: bold; }
         
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .input-group { position: relative; }
         .input-group label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 500; }
+        
+        /* Ẩn hoàn toàn mũi tên tăng giảm mặc định của input number[cite: 8] */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         .input-group input {
             width: 100%;
             background: var(--input-bg);
@@ -111,6 +123,44 @@
             outline: none;
         }
         .input-group input:focus { border-color: var(--title-color); }
+
+        /* Thiết kế Slider ẩn mượt mà xuất hiện khi hover */
+        .slider-popup {
+            position: absolute;
+            left: 0;
+            top: 100%;
+            width: 100%;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            padding: 8px 10px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-5px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+            margin-top: 4px;
+        }
+        .input-group:hover .slider-popup {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .slider-popup input[type=range] {
+            width: 100%;
+            accent-color: var(--title-color);
+            cursor: pointer;
+            height: 5px;
+        }
+        .slider-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
         
         .btn-submit {
             width: 100%;
@@ -168,21 +218,41 @@
         </div>
 
         <div class="form-grid">
+            <!-- Sepal Length -->
             <div class="input-group">
                 <label>Chiều dài đài hoa (cm)</label>
-                <input type="number" id="sl" step="0.1" value="5.1">
+                <input type="number" id="sl" step="0.1" value="5.1" min="4.0" max="8.0" oninput="syncSlider('sl', 'slRange')">
+                <div class="slider-popup">
+                    <input type="range" id="slRange" min="4.0" max="8.0" step="0.1" value="5.1" oninput="syncInput('slRange', 'sl')">
+                    <div class="slider-info"><span>4.0</span><span>8.0</span></div>
+                </div>
             </div>
+            <!-- Sepal Width -->
             <div class="input-group">
                 <label>Chiều rộng đài hoa (cm)</label>
-                <input type="number" id="sw" step="0.1" value="3.5">
+                <input type="number" id="sw" step="0.1" value="3.5" min="2.0" max="4.5" oninput="syncSlider('sw', 'swRange')">
+                <div class="slider-popup">
+                    <input type="range" id="swRange" min="2.0" max="4.5" step="0.1" value="3.5" oninput="syncInput('swRange', 'sw')">
+                    <div class="slider-info"><span>2.0</span><span>4.5</span></div>
+                </div>
             </div>
+            <!-- Petal Length -->
             <div class="input-group">
                 <label>Chiều dài cánh hoa (cm)</label>
-                <input type="number" id="pl" step="0.1" value="1.4">
+                <input type="number" id="pl" step="0.1" value="1.4" min="1.0" max="7.0" oninput="syncSlider('pl', 'plRange')">
+                <div class="slider-popup">
+                    <input type="range" id="plRange" min="1.0" max="7.0" step="0.1" value="1.4" oninput="syncInput('plRange', 'pl')">
+                    <div class="slider-info"><span>1.0</span><span>7.0</span></div>
+                </div>
             </div>
+            <!-- Petal Width -->
             <div class="input-group">
                 <label>Chiều rộng cánh hoa (cm)</label>
-                <input type="number" id="pw" step="0.1" value="0.2">
+                <input type="number" id="pw" step="0.1" value="0.2" min="0.1" max="2.5" oninput="syncSlider('pw', 'pwRange')">
+                <div class="slider-popup">
+                    <input type="range" id="pwRange" min="0.1" max="2.5" step="0.1" value="0.2" oninput="syncInput('pwRange', 'pw')">
+                    <div class="slider-info"><span>0.1</span><span>2.5</span></div>
+                </div>
             </div>
         </div>
 
@@ -229,6 +299,20 @@
         }
     };
 
+    // Đồng bộ giá trị từ ô input sang slider ẩn
+    function syncSlider(inputId, rangeId) {
+        const val = document.getElementById(inputId).value;
+        const rangeEl = document.getElementById(rangeId);
+        if (val >= rangeEl.min && val <= rangeEl.max) {
+            rangeEl.value = val;
+        }
+    }
+
+    // Đồng bộ giá trị từ slider ẩn sang ô input
+    function syncInput(rangeId, inputId) {
+        document.getElementById(inputId).value = document.getElementById(rangeId).value;
+    }
+
     function toggleTheme() {
         document.body.classList.toggle('light-mode');
         const isLight = document.body.classList.contains('light-mode');
@@ -237,16 +321,21 @@
 
     function applyPreset(sl, sw, pl, pw) {
         document.getElementById('sl').value = sl;
+        document.getElementById('slRange').value = sl;
         document.getElementById('sw').value = sw;
+        document.getElementById('swRange').value = sw;
         document.getElementById('pl').value = pl;
+        document.getElementById('plRange').value = pl;
         document.getElementById('pw').value = pw;
+        document.getElementById('pwRange').value = pw;
     }
 
     function applyRandom() {
-        document.getElementById('sl').value = (Math.random() * (7.5 - 4.3) + 4.3).toFixed(1);
-        document.getElementById('sw').value = (Math.random() * (4.4 - 2.0) + 2.0).toFixed(1);
-        document.getElementById('pl').value = (Math.random() * (6.9 - 1.0) + 1.0).toFixed(1);
-        document.getElementById('pw').value = (Math.random() * (2.5 - 0.1) + 0.1).toFixed(1);
+        const sl = (Math.random() * (7.5 - 4.3) + 4.3).toFixed(1);
+        const sw = (Math.random() * (4.4 - 2.0) + 2.0).toFixed(1);
+        const pl = (Math.random() * (6.9 - 1.0) + 1.0).toFixed(1);
+        const pw = (Math.random() * (2.5 - 0.1) + 0.1).toFixed(1);
+        applyPreset(sl, sw, pl, pw);
     }
 
     async function predictSpecies() {
