@@ -3,67 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iris SVM Classification</title>
+    <title>Iris Classification & Species Wiki</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 450px; }
-        h2 { text-align: center; color: #4F46E5; margin-bottom: 5px; }
-        p.subtitle { text-align: center; font-size: 14px; color: #666; margin-bottom: 25px; }
-        .form-group { display: flex; justify-content: space-between; margin-bottom: 20px; }
-        .input-box { width: 48%; }
-        label { font-size: 14px; font-weight: bold; color: #333; }
-        input { width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 16px;}
-        button { width: 100%; padding: 12px; background-color: #4F46E5; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        button:hover { background-color: #4338ca; }
-        #result { margin-top: 25px; text-align: center; font-weight: bold; font-size: 20px; color: #10B981; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #f8fafc;
+        }
+        .app-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .left-panel, .right-panel { flex: 1; padding: 40px; }
+        .left-panel { border-right: 1px solid rgba(255, 255, 255, 0.1); }
+        
+        h1 { font-size: 1.8rem; margin-bottom: 8px; color: #38bdf8; }
+        p.subtitle { font-size: 0.9rem; color: #94a3b8; margin-bottom: 24px; }
+        
+        .presets-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #cbd5e1; margin-bottom: 10px; }
+        .presets-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+        .btn-preset {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #e2e8f0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-preset:hover { background: #38bdf8; color: #0f172a; font-weight: bold; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+        .input-group label { display: block; font-size: 0.8rem; color: #cbd5e1; margin-bottom: 6px; }
+        .input-group input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .input-group input:focus { border-color: #38bdf8; }
+        
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+        .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .right-panel { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .placeholder-state { color: #64748b; }
+        .result-card { width: 100%; display: none; animation: fadeIn 0.4s ease-in-out forwards; }
+        .flower-image { width: 100%; height: 200px; object-fit: cover; border-radius: 16px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.2); }
+        .species-name { font-size: 1.6rem; color: #4ade80; text-transform: capitalize; margin-bottom: 12px; }
+        .wiki-box {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .wiki-item { margin-bottom: 8px; }
+        .wiki-item strong { color: #38bdf8; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @media (max-width: 768px) { .app-container { flex-direction: column; } .left-panel { border-right: none; border-bottom: 1px solid rgba(255, 255, 255, 0.1); } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Iris SVM Classification</h2>
-        <p class="subtitle">Nhập bốn kích thước, sau đó API sẽ dự đoán loại hoa.</p>
 
-        <div class="form-group">
-            <div class="input-box"><label>Sepal length (cm)</label><input type="number" id="sl" step="0.1" value="5.1"></div>
-            <div class="input-box"><label>Sepal width (cm)</label><input type="number" id="sw" step="0.1" value="3.5"></div>
-        </div>
-        <div class="form-group">
-            <div class="input-box"><label>Petal length (cm)</label><input type="number" id="pl" step="0.1" value="1.4"></div>
-            <div class="input-box"><label>Petal width (cm)</label><input type="number" id="pw" step="0.1" value="0.2"></div>
+<div class="app-container">
+    <!-- Cột trái: Form nhập liệu & Preset -->
+    <div class="left-panel">
+        <h1>Phân Loại Hoa Iris</h1>
+        <p class="subtitle">Mô hình Support Vector Machine (SVM) Classifier</p>
+
+        <div class="presets-title">Điền nhanh tham số mẫu (Centroids):</div>
+        <div class="presets-group">
+            <button class="btn-preset" onclick="applyPreset(5.0, 3.4, 1.5, 0.2)">Setosa (5.0, 3.4, 1.5, 0.2)</button>
+            <button class="btn-preset" onclick="applyPreset(5.9, 2.7, 4.2, 1.3)">Versicolor (5.9, 2.7, 4.2, 1.3)</button>
+            <button class="btn-preset" onclick="applyPreset(6.5, 2.9, 5.5, 2.0)">Virginica (6.5, 2.9, 5.5, 2.0)</button>
+            <button class="btn-preset" onclick="applyRandom()">🎲 Ngẫu nhiên</button>
         </div>
 
-        <!-- Bước 14: Gọi API được xử lý ngầm ở nút bấm này -->
-        <button onclick="predict()">Dự đoán loại hoa</button>
-        <div id="result"></div>
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Chiều dài đài hoa (cm)</label>
+                <input type="number" id="sl" step="0.1" value="5.1">
+            </div>
+            <div class="input-group">
+                <label>Chiều rộng đài hoa (cm)</label>
+                <input type="number" id="sw" step="0.1" value="3.5">
+            </div>
+            <div class="input-group">
+                <label>Chiều dài cánh hoa (cm)</label>
+                <input type="number" id="pl" step="0.1" value="1.4">
+            </div>
+            <div class="input-group">
+                <label>Chiều rộng cánh hoa (cm)</label>
+                <input type="number" id="pw" step="0.1" value="0.2">
+            </div>
+        </div>
+
+        <button class="btn-submit" onclick="predictSpecies()">Phân Loại Ngay</button>
     </div>
 
-    <script>
-        function predict() {
-            // Lấy dữ liệu từ 4 ô nhập
-            const data = {
-                sepal_length: parseFloat(document.getElementById('sl').value),
-                sepal_width: parseFloat(document.getElementById('sw').value),
-                petal_length: parseFloat(document.getElementById('pl').value),
-                petal_width: parseFloat(document.getElementById('pw').value)
-            };
+    <!-- Cột phải: Hình ảnh & Tra cứu Wiki -->
+    <div class="right-panel">
+        <div id="placeholder" class="placeholder-state">
+            <p>👈 Nhập chỉ số hoặc chọn mẫu nhanh, sau đó bấm <strong>Phân Loại Ngay</strong> để xem kết quả và thông tin sinh học.</p>
+        </div>
 
-            document.getElementById('result').innerText = "Đang dự đoán...";
+        <div id="resultCard" class="result-card">
+            <img id="flowerImg" class="flower-image" src="" alt="Hoa Iris">
+            <div id="speciesTitle" class="species-name">Iris Setosa</div>
+            <div class="wiki-box">
+                <div class="wiki-item"><strong>Tên khoa học:</strong> <span id="wikiSciName"></span></div>
+                <div class="wiki-item"><strong>Phân bố:</strong> <span id="wikiDist"></span></div>
+                <div class="wiki-item"><strong>Đặc điểm:</strong> <span id="wikiDesc"></span></div>
+                <div class="wiki-item"><strong>Insight ML:</strong> <span id="wikiFact"></span></div>
+            </div>
+        </div>
+    </div>
+</div>
 
-            // Tương đương Bước 14 trong tài liệu: Gọi API bằng Javascript
-            fetch('/predict', {
+<script>
+    const wikiData = {
+        "setosa": {
+            sciName: "Iris setosa",
+            dist: "Vùng khí hậu lạnh Bắc Mỹ và Đông Á.",
+            desc: "Cánh hoa ngắn, nhỏ, đài hoa xòe rộng. Thường có màu xanh tím đặc trưng.",
+            fact: "Tuyến tính hoàn hảo: Đây là loài duy nhất có thể phân tách 100% bằng ranh giới tuyến tính đơn giản.",
+            img: "https://upload.wikimedia.org/wikipedia/commons/5/56/Kosaciec_szczecinkowaty_Iris_setosa.jpg"
+        },
+        "versicolor": {
+            sciName: "Iris versicolor",
+            dist: "Khu vực đầm lầy, ven hồ Bắc Mỹ.",
+            desc: "Kích thước hoa trung bình, cánh hoa có vân sọc mượt mà.",
+            fact: "Ranh giới phức tạp: Nằm ở vùng trung gian trong không gian thuộc tính, dễ bị nhầm lẫn với Virginica.",
+            img: "https://upload.wikimedia.org/wikipedia/commons/4/41/Iris_versicolor_3.jpg"
+        },
+        "virginica": {
+            sciName: "Iris virginica",
+            dist: "Đồng cỏ ẩm ướt vùng Đông Bắc Mỹ.",
+            desc: "Hoa lớn nhất trong 3 loài, cánh hoa dài và có gân hoa vàng đậm nổi bật.",
+            fact: "Kích thước vượt trội: Yêu cầu mô hình SVM tính toán khoảng cách lề (margin) tối ưu để phân biệt.",
+            img: "https://upload.wikimedia.org/wikipedia/commons/9/9f/Iris_virginica.jpg"
+        }
+    };
+
+    function applyPreset(sl, sw, pl, pw) {
+        document.getElementById('sl').value = sl;
+        document.getElementById('sw').value = sw;
+        document.getElementById('pl').value = pl;
+        document.getElementById('pw').value = pw;
+    }
+
+    function applyRandom() {
+        document.getElementById('sl').value = (Math.random() * (7.5 - 4.3) + 4.3).toFixed(1);
+        document.getElementById('sw').value = (Math.random() * (4.4 - 2.0) + 2.0).toFixed(1);
+        document.getElementById('pl').value = (Math.random() * (6.9 - 1.0) + 1.0).toFixed(1);
+        document.getElementById('pw').value = (Math.random() * (2.5 - 0.1) + 0.1).toFixed(1);
+    }
+
+    async function predictSpecies() {
+        const payload = {
+            sepal_length: parseFloat(document.getElementById('sl').value),
+            sepal_width: parseFloat(document.getElementById('sw').value),
+            petal_length: parseFloat(document.getElementById('pl').value),
+            petal_width: parseFloat(document.getElementById('pw').value)
+        };
+
+        try {
+            const res = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('result').innerText = "Kết quả: Hoa " + data.prediction;
-            })
-            .catch(error => {
-                document.getElementById('result').innerText = "Lỗi kết nối API!";
-                document.getElementById('result').style.color = "red";
+                body: JSON.stringify(payload)
             });
+            const data = await res.json();
+            
+            const species = data.prediction.toLowerCase();
+            const info = wikiData[species];
+
+            document.getElementById('placeholder').style.display = 'none';
+            document.getElementById('resultCard').style.display = 'block';
+
+            document.getElementById('flowerImg').src = info.img;
+            document.getElementById('speciesTitle').innerText = "Iris " + species;
+            document.getElementById('wikiSciName').innerText = info.sciName;
+            document.getElementById('wikiDist').innerText = info.dist;
+            document.getElementById('wikiDesc').innerText = info.desc;
+            document.getElementById('wikiFact').innerText = info.fact;
+
+        } catch (err) {
+            alert('Lỗi kết nối API!');
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
